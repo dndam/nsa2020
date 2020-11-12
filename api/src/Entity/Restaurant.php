@@ -4,11 +4,18 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RestaurantRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=RestaurantRepository::class)
+ * @ApiFilter(SearchFilter::class, properties={"description": "ipartial"})
+ * @ApiFilter(BooleanFilter::class, properties={"status"})
  */
 class Restaurant
 {
@@ -20,7 +27,7 @@ class Restaurant
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
     private $image;
 
@@ -43,6 +50,16 @@ class Restaurant
      * @ORM\Column(type="float")
      */
     private $location_y;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Menu::class, mappedBy="restaurant")
+     */
+    private $menus;
+
+    public function __construct()
+    {
+        $this->menus = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -108,4 +125,35 @@ class Restaurant
 
         return $this;
     }
+
+    /**
+     * @return Collection|Menu[]
+     */
+    public function getMenus(): Collection
+    {
+        return $this->menus;
+    }
+
+    public function addMenu(Menu $menu): self
+    {
+        if (!$this->menus->contains($menu)) {
+            $this->menus[] = $menu;
+            $menu->setRestaurant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMenu(Menu $menu): self
+    {
+        if ($this->menus->removeElement($menu)) {
+            // set the owning side to null (unless already changed)
+            if ($menu->getRestaurant() === $this) {
+                $menu->setRestaurant(null);
+            }
+        }
+
+        return $this;
+    }
 }
+

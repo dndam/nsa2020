@@ -7,10 +7,15 @@ use App\Repository\MenuRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=MenuRepository::class)
+ * @ApiFilter(SearchFilter::class, properties={"description": "ipartial"})
+ * @ApiFilter(OrderFilter::class, properties={"price"}, arguments={"orderParameterName"="order"})
  */
 class Menu
 {
@@ -40,6 +45,12 @@ class Menu
      * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="menu")
      */
     private $orders;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Restaurant::class, inversedBy="menus")
+     * @ORM\JoinColumn(name="restaurant_id", referencedColumnName="id")
+     */
+    private $restaurant;
 
     public function __construct()
     {
@@ -114,4 +125,17 @@ class Menu
 
         return $this;
     }
+
+    public function getRestaurant(): ?Restaurant
+    {
+        return $this->restaurant;
+    }
+
+    public function setRestaurant(?Restaurant $restaurant): self
+    {
+        $this->restaurant = $restaurant;
+
+        return $this;
+    }
 }
+
