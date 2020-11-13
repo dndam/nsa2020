@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Repository\RestaurantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -53,6 +54,8 @@ class Restaurant
 
     /**
      * @ORM\OneToMany(targetEntity=Menu::class, mappedBy="restaurant")
+     *
+     * @ApiSubresource
      */
     private $menus;
 
